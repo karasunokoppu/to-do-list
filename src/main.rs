@@ -3,6 +3,7 @@ use std::fs::{self, File};
 use std::io::prelude::*;
 use std::path::Path;
 use serde::{Serialize, Deserialize};
+use colored::Colorize;
 
 #[derive(Serialize,Deserialize,Debug)]
 #[serde(rename_all = "PascalCase")]
@@ -13,6 +14,10 @@ struct ToDoTask{
 }
 
 fn main() {
+    run();
+}
+
+fn run(){
     //to do list
     let mut to_do_list: Vec<ToDoTask> = Vec::new();
     let file = Path::new("task/task.json");
@@ -20,7 +25,9 @@ fn main() {
     //メインループ
     loop{
         //実行したいコマンドを選択
-        println!(">実行したいタスクを選択してください.\n1. 閲覧\n2. 追加\n3. 編集\n4. 終了");
+        println!("\n{}",">実行したいタスクを選択してください.".truecolor(255, 165, 0));
+        println!("{} 閲覧  {} 追加   {} 編集   {} 終了\n","[1]".blue(),"[2]".blue(),"[3]".blue(), "[4]".blue());
+        
         let command_task_input = standard_input_u32();
         let command_task = match command_task_input {
             1 => "「閲覧」が選択されました．".to_string(),
@@ -29,7 +36,9 @@ fn main() {
             4 => "「終了」が選択されました．".to_string(),
             _ => "正しい値を入力してください.".to_string()
         };
-        println!(">{}", command_task);
+        let command_task2 = ">".to_string();
+        let command_task3 = command_task2 + &command_task;
+        println!("{}", command_task3.purple());
 
         //実行
         if command_task_input == 1 {//閲覧
@@ -67,12 +76,13 @@ fn main() {
             display_task(&to_do_list);
 
             //タスク選択
-            println!(">編集したいタスクの番号を入力してください．");
+            println!("{}",">編集したいタスクの番号を入力してください．".purple());
             let command_task_number_u32 = standard_input_u32();
             let task_index = command_task_number_u32 as usize;
 
             //実行コマンド選択
-            println!(">編集内容を選択してください.\n1. 達成状況\n2. 内容\n3. 期限\n4. 削除\n");
+            println!("\n{}",">編集内容を選択してください.".truecolor(255, 165, 0));
+            println!("{} 達成状況  {} 内容   {} 期限   {} 削除\n","[1]".blue(),"[2]".blue(),"[3]".blue(), "[4]".blue());
             let command_task_number = standard_input_u32();
 
             if command_task_number == 1 {
@@ -85,18 +95,18 @@ fn main() {
                     break;
                 }
             }else if command_task_number == 2 {
-                println!(">新しい内容を入力してください．");
+                println!("{}",">新しい内容を入力してください．".purple());
                 let new_task_objective = standard_input_string();
                 to_do_list[task_index].objective = new_task_objective;
-                println!(">{}番のタスクの内容を変更しました．", task_index);
+                println!("{}{}{}",">".purple(), task_index.to_string().purple(), "番のタスクの内容を変更しました．".purple());
             }else if command_task_number == 3 {
-                println!(">新しい期限を入力してください．");
+                println!("{}",">新しい期限を入力してください．".purple());
                 let new_task_term = standard_input_string();
                 to_do_list[task_index].term = new_task_term;
-                println!(">{}番のタスクの期限を変更しました．", task_index);
+                println!("{}{}{}",">".purple(), task_index.to_string().purple(), "番のタスクの期限を変更しました．".purple());
             }else if command_task_number == 4 {
                 to_do_list.remove(task_index);
-                println!(">{}番のタスクを削除しました．", task_index);
+                println!("{}{}{}",">".purple(), task_index.to_string().purple(), "番のタスクの内容を削除しました．".purple());
             }else {
                 break;
             }
@@ -127,9 +137,9 @@ fn main() {
     }
     //タスクを作成
     fn make_task() -> ToDoTask{
-        println!(">タスク内容を入力してください．");
+        println!("{}",">タスク内容を入力してください．".purple());
         let task_objective = standard_input_string();
-        println!(">タスクの達成期限を入力してください．");
+        println!("{}",">タスクの達成期限を入力してください．".purple());
         let task_term = standard_input_string();
         let task = ToDoTask{
             condition:  false,
@@ -151,11 +161,15 @@ fn main() {
     //タスクを表示
     fn display_task(to_do_list:&Vec<ToDoTask>){
         let mut task_num = 0;
+        println!("{}{  }{}{}","No.".blue(), "  状況  ".red(), " 日付 ".bright_yellow(), "   内容".bright_white());
+        println!("{}", "--- ------ ------  ----------------------------------".truecolor(0, 255, 8));
         for data in to_do_list {
-            let cond = if data.condition {"達成"}else{"未達成"};
-            println!("{}========{}========{}", task_num, task_num,  task_num);
-            println!("達成状況: {}\n内容: {}\n期限: {}", cond, data.objective, data.term);
-            println!("{}========{}========{}", task_num, task_num,  task_num);
+            let cond = if data.condition {"達成　".red()}else{"未達成".dimmed()};
+            print!("{}:  ", task_num.to_string().blue());
+            print!("{}  ", cond);
+            print!("{}  ", data.term.bright_yellow());
+            println!("{}",data.objective);
             task_num += 1;
         }
+        println!(" ");
     }
